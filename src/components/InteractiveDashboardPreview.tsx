@@ -5,11 +5,9 @@ import {
   CheckCircle2, 
   TrendingUp, 
   Search, 
-  Plus, 
-  ArrowUpRight, 
-  Sparkles,
   ExternalLink,
-  ShieldAlert
+  Sparkles,
+  ArrowUpRight
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { SEED_LEADS } from '../data/seedLeads';
@@ -35,13 +33,16 @@ export const InteractiveDashboardPreview: React.FC<PreviewProps> = ({ onOpenFull
 
   const totalValue = leadsList.reduce((acc, curr) => acc + curr.deal_value, 0);
   const convertedCount = leadsList.filter((l) => l.status === 'Converted').length;
+  const qualifiedCount = leadsList.filter((l) => l.status === 'Qualified').length;
+  const contactedCount = leadsList.filter((l) => l.status === 'Contacted').length;
+  const newCount = leadsList.filter((l) => l.status === 'New').length;
   const conversionRate = Math.round((convertedCount / leadsList.length) * 100);
 
   const handleSimulateConvert = (leadId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     confetti({
-      particleCount: 50,
-      spread: 60,
+      particleCount: 60,
+      spread: 70,
       origin: { y: 0.6 },
     });
 
@@ -55,11 +56,22 @@ export const InteractiveDashboardPreview: React.FC<PreviewProps> = ({ onOpenFull
       case 'New':
         return <span className="badge badge-new">New Inbound</span>;
       case 'Contacted':
-        return <span className="badge badge-contacted">Discovery Done</span>;
+        return <span className="badge badge-contacted">Discovery Call</span>;
       case 'Qualified':
         return <span className="badge badge-qualified">Proposal Sent</span>;
       case 'Converted':
         return <span className="badge badge-converted">Won & Paid ✓</span>;
+    }
+  };
+
+  const getSourceBadgeClass = (source: string) => {
+    switch (source) {
+      case 'Upwork': return 'badge-upwork';
+      case 'Fiverr': return 'badge-fiverr';
+      case 'LinkedIn': return 'badge-linkedin';
+      case 'Website': return 'badge-website';
+      case 'Referral': return 'badge-referral';
+      default: return 'badge-source';
     }
   };
 
@@ -114,7 +126,7 @@ export const InteractiveDashboardPreview: React.FC<PreviewProps> = ({ onOpenFull
             }}
           >
             <span className="ping-dot" style={{ backgroundColor: '#10b981' }} />
-            PostgreSQL Active
+            Supabase PostgreSQL Ready
           </span>
           <button
             onClick={onOpenFullApp}
@@ -152,7 +164,7 @@ export const InteractiveDashboardPreview: React.FC<PreviewProps> = ({ onOpenFull
               {leadsList.length} Leads
             </div>
             <div style={{ fontSize: '0.71875rem', color: '#64748b', marginTop: '2px' }}>
-              5 high priority
+              {newCount} new inbounds
             </div>
           </div>
 
@@ -165,21 +177,35 @@ export const InteractiveDashboardPreview: React.FC<PreviewProps> = ({ onOpenFull
               {conversionRate}%
             </div>
             <div style={{ fontSize: '0.71875rem', color: '#10b981', fontWeight: 600, marginTop: '2px' }}>
-              Industry top decile
+              {convertedCount} closed contracts
             </div>
           </div>
 
           <div className="card" style={{ padding: '1rem', border: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#64748b', fontSize: '0.78125rem', fontWeight: 600 }}>
-              <span>Avg Deal Size</span>
+              <span>Proposals Active</span>
               <Sparkles size={16} color="#8b5cf6" />
             </div>
             <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '0.25rem' }}>
-              ${Math.round(totalValue / leadsList.length).toLocaleString()}
+              {qualifiedCount} Deals
             </div>
             <div style={{ fontSize: '0.71875rem', color: '#64748b', marginTop: '2px' }}>
-              Based on active pipeline
+              {contactedCount} discovery calls
             </div>
+          </div>
+        </div>
+
+        {/* Pipeline Distribution Meter Bar */}
+        <div style={{ marginBottom: '1.25rem', backgroundColor: '#ffffff', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid #e2e8f0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.4rem' }}>
+            <span>Pipeline Distribution</span>
+            <span>{convertedCount} of {leadsList.length} deals won ({conversionRate}%)</span>
+          </div>
+          <div style={{ height: '8px', borderRadius: '4px', backgroundColor: '#f1f5f9', display: 'flex', overflow: 'hidden' }}>
+            <div style={{ width: `${(newCount / leadsList.length) * 100}%`, backgroundColor: '#3b82f6' }} title={`New Inbounds: ${newCount}`} />
+            <div style={{ width: `${(contactedCount / leadsList.length) * 100}%`, backgroundColor: '#f59e0b' }} title={`Contacted: ${contactedCount}`} />
+            <div style={{ width: `${(qualifiedCount / leadsList.length) * 100}%`, backgroundColor: '#8b5cf6' }} title={`Qualified: ${qualifiedCount}`} />
+            <div style={{ width: `${(convertedCount / leadsList.length) * 100}%`, backgroundColor: '#10b981' }} title={`Converted: ${convertedCount}`} />
           </div>
         </div>
 
@@ -290,7 +316,9 @@ export const InteractiveDashboardPreview: React.FC<PreviewProps> = ({ onOpenFull
                     </div>
                   </td>
                   <td>
-                    <span className="badge badge-source">{lead.source}</span>
+                    <span className={`badge ${getSourceBadgeClass(lead.source)}`}>
+                      {lead.source}
+                    </span>
                   </td>
                   <td>
                     <span style={{ fontWeight: 700, color: '#0f172a' }}>
