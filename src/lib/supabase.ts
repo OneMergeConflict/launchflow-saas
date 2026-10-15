@@ -102,15 +102,15 @@ export async function apiFetchLeads(userId?: string): Promise<{ data: Lead[]; so
   if (client) {
     try {
       let query = client.from('leads').select('*').order('created_at', { ascending: false });
-      if (userId) {
-        query = query.eq('user_id', userId);
+      if (userId && !userId.startsWith('demo') && !userId.startsWith('user_')) {
+        query = query.or(`user_id.eq.${userId},user_id.is.null`);
       }
       const { data, error } = await query;
       if (error) {
         console.warn('Supabase fetch leads error, falling back to local data:', error.message);
         return { data: getLocalLeads(), source: 'local', error: error.message };
       }
-      if (data && data.length >= 0) {
+      if (data && data.length > 0) {
         return { data: data as Lead[], source: 'supabase' };
       }
     } catch (err: unknown) {
@@ -125,20 +125,14 @@ export async function apiFetchLeads(userId?: string): Promise<{ data: Lead[]; so
 
 export async function apiCreateLead(leadData: Omit<Lead, 'id' | 'created_at'>, userId?: string): Promise<{ data: Lead; source: 'supabase' | 'local' }> {
   const client = getSupabaseClient();
-  const newLeadObj: Lead = {
-    ...leadData,
-    id: `lead_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-    user_id: userId,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+  const validUserId = (userId && !userId.startsWith('demo') && !userId.startsWith('user_')) ? userId : null;
 
-  if (client && userId) {
+  if (client) {
     try {
       const { data, error } = await client
         .from('leads')
         .insert([{
-          user_id: userId,
+          user_id: validUserId,
           name: leadData.name,
           email: leadData.email,
           company: leadData.company,
@@ -160,6 +154,13 @@ export async function apiCreateLead(leadData: Omit<Lead, 'id' | 'created_at'>, u
   }
 
   // Local fallback
+  const newLeadObj: Lead = {
+    ...leadData,
+    id: `lead_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    user_id: userId,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
   const current = getLocalLeads();
   const updated = [newLeadObj, ...current];
   saveLocalLeads(updated);

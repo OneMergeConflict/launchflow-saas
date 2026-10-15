@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Check, Sparkles, ArrowRight, Shield } from 'lucide-react';
 
 interface PricingProps {
-  onSelectPlan: (plan: string) => void;
+  onSelectPlan: (plan: string, price: number) => void;
 }
 
 export const Pricing: React.FC<PricingProps> = ({ onSelectPlan }) => {
@@ -270,7 +270,7 @@ export const Pricing: React.FC<PricingProps> = ({ onSelectPlan }) => {
                 </div>
 
                 <button
-                  onClick={() => onSelectPlan(plan.name)}
+                  onClick={() => onSelectPlan(plan.name, price)}
                   className={`btn ${plan.ctaClass}`}
                   style={{ width: '100%', padding: '0.8125rem' }}
                 >

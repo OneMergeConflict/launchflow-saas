@@ -11,6 +11,7 @@ import { DashboardView } from './components/DashboardView';
 import { AuthModal } from './components/AuthModal';
 import { LeadModal } from './components/LeadModal';
 import { SupabaseConfigModal } from './components/SupabaseConfigModal';
+import { CheckoutModal } from './components/CheckoutModal';
 import { ToastContainer } from './components/Toast';
 
 import { 
@@ -42,6 +43,8 @@ export const App: React.FC = () => {
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [supabaseModalOpen, setSupabaseModalOpen] = useState(false);
   const [isSupabaseActive, setIsSupabaseActive] = useState(false);
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: number }>({ name: 'Professional', price: 24 });
 
   // Toast Notifications
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -190,7 +193,16 @@ export const App: React.FC = () => {
           />
           <Features />
           <Workflow />
-          <Pricing onSelectPlan={() => handleOpenAuth('signup')} />
+          <Pricing
+            onSelectPlan={(plan, price) => {
+              if (price === 0) {
+                handleOpenAuth('signup');
+              } else {
+                setSelectedPlan({ name: plan, price });
+                setCheckoutModalOpen(true);
+              }
+            }}
+          />
           <FAQ />
           <EarlyAccessForm onSuccessToast={(msg) => addToast('success', 'Early Access Reserved', msg)} />
           <Footer
@@ -228,6 +240,26 @@ export const App: React.FC = () => {
         leadToEdit={editingLead}
         onClose={() => setLeadModalOpen(false)}
         onSave={handleSaveLead}
+      />
+
+      <CheckoutModal
+        isOpen={checkoutModalOpen}
+        planName={selectedPlan.name}
+        price={selectedPlan.price}
+        onClose={() => setCheckoutModalOpen(false)}
+        onSuccess={() => {
+          setCheckoutModalOpen(false);
+          addToast('success', 'Subscription Activated! 🎉', `Welcome to LaunchFlow ${selectedPlan.name}. Full access unlocked.`);
+          if (!session) {
+            setSession({
+              id: 'paid-subscriber-session',
+              email: 'pro-member@launchflow.io',
+              fullName: 'Pro Subscriber',
+              isDemo: false,
+            });
+          }
+          setCurrentView('app');
+        }}
       />
 
       <SupabaseConfigModal
