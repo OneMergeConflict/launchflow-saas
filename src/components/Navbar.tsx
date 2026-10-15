@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Menu, X, ArrowRight, ShieldCheck, Database } from 'lucide-react';
+import { Sparkles, Menu, X, ArrowRight } from 'lucide-react';
 import { UserSession } from '../types';
 
 interface NavbarProps {
@@ -110,26 +110,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             FAQ
           </button>
-          <button
-            onClick={onOpenSupabaseConfig}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.375rem',
-              background: isSupabaseActive ? '#ecfdf5' : '#f1f5f9',
-              border: `1px solid ${isSupabaseActive ? '#a7f3d0' : '#e2e8f0'}`,
-              color: isSupabaseActive ? '#047857' : '#475569',
-              borderRadius: 'var(--radius-full)',
-              padding: '0.25rem 0.625rem',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-            title="Configure or test Supabase connection"
-          >
-            <Database size={13} />
-            <span>{isSupabaseActive ? 'Supabase Live' : 'Supabase Config'}</span>
-          </button>
         </nav>
 
         {/* Desktop CTA / Auth buttons */}
@@ -217,29 +197,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             FAQ
           </button>
-
-          <button
-            onClick={() => {
-              setMobileMenuOpen(false);
-              onOpenSupabaseConfig();
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.625rem',
-              background: isSupabaseActive ? '#ecfdf5' : '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: 'var(--radius-md)',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: isSupabaseActive ? '#047857' : '#334155',
-            }}
-          >
-            <Database size={16} />
-            <span>{isSupabaseActive ? 'Supabase Database: Connected' : 'Configure Supabase Database'}</span>
-          </button>
-
           <div style={{ height: '1px', backgroundColor: '#e2e8f0', margin: '0.5rem 0' }} />
 
           {session ? (
